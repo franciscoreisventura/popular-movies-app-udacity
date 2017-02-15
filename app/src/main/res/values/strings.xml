@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Popular Movies</string>
+    <string name="api_key">PUT YOUR API KEY HERE</string>
 </resources>
