@@ -32,7 +32,6 @@ public class TMDMoviePosterAdapter extends ArrayAdapter<Uri> {
             convertView = new ImageView(getContext());
         }
         Uri tBDMovieUri = getItem(position);
-        System.out.println(tBDMovieUri);
         Picasso.with(getContext()).load(tBDMovieUri).into((ImageView) convertView);
         return convertView;
     }
