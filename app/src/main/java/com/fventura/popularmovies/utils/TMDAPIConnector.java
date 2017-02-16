@@ -1,17 +1,12 @@
 package com.fventura.popularmovies.utils;
 
 import android.net.Uri;
-import android.os.AsyncTask;
-
-import com.fventura.popularmovies.TMDMovie;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -21,12 +16,27 @@ import java.util.Scanner;
 public class TMDAPIConnector {
     private final static String TMD_BASE_URL = "https://api.themoviedb.org/3/movie/";
     private final static String TMD_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
-    private final static String TOP_RATED = "top_rated";
+    private static final String SORT_MOST_POPULAR = "popular";
+    private final static String SORT_TOP_RATED = "top_rated";
     private final static String API_KEY_QUERY = "api_key";
 
-    public static URL getPopularMoviesURL(String apiKey) {
+    public enum SORT_OPTIONS {
+        MOST_POPULAR,
+        TOP_RATED
+    }
+
+    public static URL getSortedMoviesURL(String apiKey, SORT_OPTIONS sortBy) {
+        String sortByString = SORT_MOST_POPULAR;
+        switch (sortBy) {
+            case MOST_POPULAR:
+                sortByString = SORT_MOST_POPULAR;
+                break;
+            case TOP_RATED:
+                sortByString = SORT_TOP_RATED;
+                break;
+        }
         Uri uri = Uri.parse(TMD_BASE_URL).buildUpon()
-                .appendPath(TOP_RATED).appendQueryParameter(API_KEY_QUERY, apiKey)
+                .appendPath(sortByString).appendQueryParameter(API_KEY_QUERY, apiKey)
                 .build();
         URL url = null;
         try {
@@ -38,7 +48,7 @@ public class TMDAPIConnector {
     }
 
     public static Uri getMoviePosterUri(String poster) {
-        return Uri.parse(TMD_IMAGE_URL+poster).buildUpon().build();
+        return Uri.parse(TMD_IMAGE_URL + poster).buildUpon().build();
     }
 
     public static String getResponseFromAPI(URL... params) throws IOException {
@@ -61,4 +71,5 @@ public class TMDAPIConnector {
             urlConnection.disconnect();
         }
     }
+
 }

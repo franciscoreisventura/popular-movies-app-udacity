@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.GridView;
 
 import com.fventura.popularmovies.utils.TMDAPIConnector;
@@ -25,10 +27,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTMDMoviesGridView = (GridView) findViewById(R.id.gv_tmdmovies);
-        new MoviePosterFiller(this).execute(TMDAPIConnector.getPopularMoviesURL(getString(R.string.api_key)));
+        new MoviePosterFiller(this).execute(TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), TMDAPIConnector.SORT_OPTIONS.MOST_POPULAR));
     }
 
-    private void fillMovieList() {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        TMDAPIConnector.SORT_OPTIONS sortOption = null;
+        switch (item.getItemId()) {
+            case R.id.menu_item_most_popular:
+                sortOption = TMDAPIConnector.SORT_OPTIONS.MOST_POPULAR;
+                break;
+            case R.id.menu_item_top_rated:
+                sortOption = TMDAPIConnector.SORT_OPTIONS.TOP_RATED;
+                break;
+        }
+        new MoviePosterFiller(this).execute(TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), sortOption));
+        return true;
     }
 
     public class MoviePosterFiller extends AsyncTask<URL, Void, String> {
@@ -54,7 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            //TODO CHECK IF OBJECT IS NULL AND PUT EMPTY IMAGE
+            if (result == null) {
+                return;
+            }
             try {
                 JSONObject resultJSON = new JSONObject(result);
                 JSONArray movies = resultJSON.getJSONArray("results");
