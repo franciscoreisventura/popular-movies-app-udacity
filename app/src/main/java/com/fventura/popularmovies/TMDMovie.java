@@ -1,28 +1,31 @@
 package com.fventura.popularmovies;
 
+import android.net.Uri;
+
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by fventura on 14/02/17.
  */
 
-public class TMDMovie {
-    private String mPosterUrl;
+public class TMDMovie implements Serializable {
+    private String mPosterUri;
     private String mTitle;
-    private Date mReleaseDate;
+    private String mReleaseDate;
     private double mVoteAverage;
-    private String synopsis;
+    private String mSynopsis;
 
     public TMDMovie() {
 
     }
 
-    public String getmPosterUrl() {
-        return mPosterUrl;
+    public String getmPosterUri() {
+        return mPosterUri;
     }
 
-    public void setmPosterUrl(String mPosterUrl) {
-        this.mPosterUrl = mPosterUrl;
+    public void setmPosterUri(String mPosterUri) {
+        this.mPosterUri = mPosterUri;
     }
 
     public String getmTitle() {
@@ -33,11 +36,11 @@ public class TMDMovie {
         this.mTitle = mTitle;
     }
 
-    public Date getmReleaseDate() {
+    public String getmReleaseDate() {
         return mReleaseDate;
     }
 
-    public void setmReleaseDate(Date mReleaseDate) {
+    public void setmReleaseDate(String mReleaseDate) {
         this.mReleaseDate = mReleaseDate;
     }
 
@@ -49,11 +52,11 @@ public class TMDMovie {
         this.mVoteAverage = mVoteAverage;
     }
 
-    public String getSynopsis() {
-        return synopsis;
+    public String getmSynopsis() {
+        return mSynopsis;
     }
 
-    public void setSynopsis(String synopsis) {
-        this.synopsis = synopsis;
+    public void setmSynopsis(String mSynopsis) {
+        this.mSynopsis = mSynopsis;
     }
 }

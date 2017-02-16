@@ -3,4 +3,8 @@
     <string name="api_key">PUT YOUR API KEY HERE</string>
     <string name="menu_item_top_rated">Rating</string>
     <string name="menu_item_most_popular">Popularity</string>
+    <string name="tv_movie_details_title">Title</string>
+    <string name="tv_movie_details_date_release">Date Released</string>
+    <string name="tv_movie_details_synopsis">Synopsis</string>
+    <string name="tv_movie_details_vote_average">Vote Average</string>
 </resources>

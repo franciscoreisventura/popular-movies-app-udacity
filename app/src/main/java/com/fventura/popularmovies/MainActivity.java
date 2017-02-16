@@ -1,7 +1,6 @@
 package com.fventura.popularmovies;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -80,11 +79,16 @@ public class MainActivity extends AppCompatActivity {
             try {
                 JSONObject resultJSON = new JSONObject(result);
                 JSONArray movies = resultJSON.getJSONArray("results");
-                Uri[] moviePosterUris = new Uri[movies.length()];
+                TMDMovie[] tmdMovies = new TMDMovie[movies.length()];
                 for (int i = 0; i < movies.length(); i++) {
-                    moviePosterUris[i] = TMDAPIConnector.getMoviePosterUri(movies.getJSONObject(i).getString("poster_path"));
+                    tmdMovies[i] = new TMDMovie();
+                    tmdMovies[i].setmTitle(movies.getJSONObject(i).getString("title"));
+                    tmdMovies[i].setmReleaseDate(movies.getJSONObject(i).getString(("release_date")));
+                    tmdMovies[i].setmSynopsis(movies.getJSONObject(i).getString("overview"));
+                    tmdMovies[i].setmVoteAverage(Double.parseDouble(movies.getJSONObject(i).getString("vote_average")));
+                    tmdMovies[i].setmPosterUri(TMDAPIConnector.getMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
                 }
-                TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(mContext, moviePosterUris);
+                TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(mContext, tmdMovies);
                 mTMDMoviesGridView.setAdapter(tMDMoviePosterAdapter);
                 tMDMoviePosterAdapter.notifyDataSetChanged();
             } catch (JSONException e) {

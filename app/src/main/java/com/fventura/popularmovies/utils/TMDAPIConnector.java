@@ -47,8 +47,8 @@ public class TMDAPIConnector {
         }
     }
 
-    public static Uri getMoviePosterUri(String poster) {
-        return Uri.parse(TMD_IMAGE_URL + poster).buildUpon().build();
+    public static String getMoviePosterUriString(String poster) {
+        return Uri.parse(TMD_IMAGE_URL + poster).buildUpon().build().toString();
     }
 
     public static String getResponseFromAPI(URL... params) throws IOException {
