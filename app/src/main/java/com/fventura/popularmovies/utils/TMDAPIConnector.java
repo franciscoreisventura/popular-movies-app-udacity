@@ -16,6 +16,7 @@ import java.util.Scanner;
 public class TMDAPIConnector {
     private final static String TMD_BASE_URL = "https://api.themoviedb.org/3/movie/";
     private final static String TMD_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
+    private final static String TMD_BIG_IMAGE_URL = "http://image.tmdb.org/t/p/w780";
     private static final String SORT_MOST_POPULAR = "popular";
     private final static String SORT_TOP_RATED = "top_rated";
     private final static String API_KEY_QUERY = "api_key";
@@ -49,6 +50,10 @@ public class TMDAPIConnector {
 
     public static String getMoviePosterUriString(String poster) {
         return Uri.parse(TMD_IMAGE_URL + poster).buildUpon().build().toString();
+    }
+
+    public static String getBigMoviePosterUriString(String poster) {
+        return Uri.parse(TMD_BIG_IMAGE_URL + poster).buildUpon().build().toString();
     }
 
     public static String getResponseFromAPI(URL... params) throws IOException {

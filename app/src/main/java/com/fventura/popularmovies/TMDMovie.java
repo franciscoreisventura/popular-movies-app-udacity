@@ -11,6 +11,7 @@ import java.util.Date;
 
 public class TMDMovie implements Serializable {
     private String mPosterUri;
+    private String mBigPosterUri;
     private String mTitle;
     private String mReleaseDate;
     private double mVoteAverage;
@@ -26,6 +27,14 @@ public class TMDMovie implements Serializable {
 
     public void setmPosterUri(String mPosterUri) {
         this.mPosterUri = mPosterUri;
+    }
+
+    public String getmBigPosterUri() {
+        return mBigPosterUri;
+    }
+
+    public void setmBigPosterUri(String mBigPosterUri) {
+        this.mBigPosterUri = mBigPosterUri;
     }
 
     public String getmTitle() {

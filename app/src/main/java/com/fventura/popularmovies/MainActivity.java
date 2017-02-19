@@ -6,13 +6,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import com.fventura.popularmovies.utils.TMDAPIConnector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.net.URL;
@@ -20,12 +23,14 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     private GridView mTMDMoviesGridView;
-
+    private TextView mErrorTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTMDMoviesGridView = (GridView) findViewById(R.id.gv_tmdmovies);
+        mErrorTextView = (TextView) findViewById(R.id.tv_error);
+        showMovies();
         new MoviePosterFiller(this).execute(TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), TMDAPIConnector.SORT_OPTIONS.MOST_POPULAR));
     }
 
@@ -50,6 +55,16 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void showError(){
+        mTMDMoviesGridView.setVisibility(View.INVISIBLE);
+        mErrorTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void showMovies(){
+        mTMDMoviesGridView.setVisibility(View.VISIBLE);
+        mErrorTextView.setVisibility(View.INVISIBLE);
+    }
+
     public class MoviePosterFiller extends AsyncTask<URL, Void, String> {
 
         private Context mContext;
@@ -64,16 +79,15 @@ public class MainActivity extends AppCompatActivity {
                 if (params[0] != null) {
                     return TMDAPIConnector.getResponseFromAPI(params[0]);
                 }
-                return null;
-            } catch (IOException e) { //TODO ERROR HANDLING
-                e.printStackTrace();
-                return null;
+            } catch (IOException e) {
             }
+            return null;
         }
 
         @Override
         protected void onPostExecute(String result) {
             if (result == null) {
+                showError();
                 return;
             }
             try {
@@ -87,12 +101,14 @@ public class MainActivity extends AppCompatActivity {
                     tmdMovies[i].setmSynopsis(movies.getJSONObject(i).getString("overview"));
                     tmdMovies[i].setmVoteAverage(Double.parseDouble(movies.getJSONObject(i).getString("vote_average")));
                     tmdMovies[i].setmPosterUri(TMDAPIConnector.getMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
+                    tmdMovies[i].setmBigPosterUri(TMDAPIConnector.getBigMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
                 }
                 TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(mContext, tmdMovies);
                 mTMDMoviesGridView.setAdapter(tMDMoviePosterAdapter);
                 tMDMoviePosterAdapter.notifyDataSetChanged();
+                showMovies();
             } catch (JSONException e) {
-                e.printStackTrace(); //TODO EMPTY IMAGE TOO
+                showError();
             }
         }
     }

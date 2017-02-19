@@ -16,7 +16,6 @@ import com.squareup.picasso.Picasso;
 public class TMDMoviePosterAdapter extends ArrayAdapter<TMDMovie> {
 
     public TMDMoviePosterAdapter(Context context, TMDMovie[] tmdMovieList) {
-        //todo verifynulls?
         super(context, 0, tmdMovieList);
     }
 
