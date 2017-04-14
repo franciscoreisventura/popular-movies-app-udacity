@@ -1,7 +1,5 @@
 package com.fventura.popularmovies;
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -10,20 +8,24 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.fventura.popularmovies.utils.TMDAPIConnector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
     private GridView mTMDMoviesGridView;
     private TextView mErrorTextView;
+    RequestQueue mQueue;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,7 +33,44 @@ public class MainActivity extends AppCompatActivity {
         mTMDMoviesGridView = (GridView) findViewById(R.id.gv_tmdmovies);
         mErrorTextView = (TextView) findViewById(R.id.tv_error);
         showMovies();
-        new MoviePosterFiller(this).execute(TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), TMDAPIConnector.SORT_OPTIONS.MOST_POPULAR));
+        mQueue = Volley.newRequestQueue(this);
+        //TODO remove repeated code and move the API key to the inside class.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), TMDAPIConnector.SORT_OPTIONS.MOST_POPULAR).toString(),
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (response == null) {
+                            showError();
+                            return;
+                        }
+                        try {
+                            JSONObject resultJSON = new JSONObject(response);
+                            JSONArray movies = resultJSON.getJSONArray("results");
+                            TMDMovie[] tmdMovies = new TMDMovie[movies.length()];
+                            for (int i = 0; i < movies.length(); i++) {
+                                tmdMovies[i] = new TMDMovie();
+                                tmdMovies[i].setmTitle(movies.getJSONObject(i).getString("title"));
+                                tmdMovies[i].setmReleaseDate(movies.getJSONObject(i).getString(("release_date")));
+                                tmdMovies[i].setmSynopsis(movies.getJSONObject(i).getString("overview"));
+                                tmdMovies[i].setmVoteAverage(Double.parseDouble(movies.getJSONObject(i).getString("vote_average")));
+                                tmdMovies[i].setmPosterUri(TMDAPIConnector.getMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
+                                tmdMovies[i].setmBigPosterUri(TMDAPIConnector.getBigMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
+                            }
+                            TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(MainActivity.this, tmdMovies);
+                            mTMDMoviesGridView.setAdapter(tMDMoviePosterAdapter);
+                            tMDMoviePosterAdapter.notifyDataSetChanged();
+                            showMovies();
+                        } catch (JSONException e) {
+                            showError();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                showError();
+            }
+        });
+        mQueue.add(stringRequest);
     }
 
     @Override
@@ -51,7 +90,42 @@ public class MainActivity extends AppCompatActivity {
                 sortOption = TMDAPIConnector.SORT_OPTIONS.TOP_RATED;
                 break;
         }
-        new MoviePosterFiller(this).execute(TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), sortOption));
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), sortOption).toString(),
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (response == null) {
+                            showError();
+                            return;
+                        }
+                        try {
+                            JSONObject resultJSON = new JSONObject(response);
+                            JSONArray movies = resultJSON.getJSONArray("results");
+                            TMDMovie[] tmdMovies = new TMDMovie[movies.length()];
+                            for (int i = 0; i < movies.length(); i++) {
+                                tmdMovies[i] = new TMDMovie();
+                                tmdMovies[i].setmTitle(movies.getJSONObject(i).getString("title"));
+                                tmdMovies[i].setmReleaseDate(movies.getJSONObject(i).getString(("release_date")));
+                                tmdMovies[i].setmSynopsis(movies.getJSONObject(i).getString("overview"));
+                                tmdMovies[i].setmVoteAverage(Double.parseDouble(movies.getJSONObject(i).getString("vote_average")));
+                                tmdMovies[i].setmPosterUri(TMDAPIConnector.getMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
+                                tmdMovies[i].setmBigPosterUri(TMDAPIConnector.getBigMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
+                            }
+                            TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(MainActivity.this, tmdMovies);
+                            mTMDMoviesGridView.setAdapter(tMDMoviePosterAdapter);
+                            tMDMoviePosterAdapter.notifyDataSetChanged();
+                            showMovies();
+                        } catch (JSONException e) {
+                            showError();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                showError();
+            }
+        });
+        mQueue.add(stringRequest);
         return true;
     }
 
@@ -63,53 +137,5 @@ public class MainActivity extends AppCompatActivity {
     private void showMovies(){
         mTMDMoviesGridView.setVisibility(View.VISIBLE);
         mErrorTextView.setVisibility(View.INVISIBLE);
-    }
-
-    public class MoviePosterFiller extends AsyncTask<URL, Void, String> {
-
-        private Context mContext;
-
-        MoviePosterFiller(Context context) {
-            this.mContext = context;
-        }
-
-        @Override
-        protected String doInBackground(URL... params) {
-            try {
-                if (params[0] != null) {
-                    return TMDAPIConnector.getResponseFromAPI(params[0]);
-                }
-            } catch (IOException e) {
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result == null) {
-                showError();
-                return;
-            }
-            try {
-                JSONObject resultJSON = new JSONObject(result);
-                JSONArray movies = resultJSON.getJSONArray("results");
-                TMDMovie[] tmdMovies = new TMDMovie[movies.length()];
-                for (int i = 0; i < movies.length(); i++) {
-                    tmdMovies[i] = new TMDMovie();
-                    tmdMovies[i].setmTitle(movies.getJSONObject(i).getString("title"));
-                    tmdMovies[i].setmReleaseDate(movies.getJSONObject(i).getString(("release_date")));
-                    tmdMovies[i].setmSynopsis(movies.getJSONObject(i).getString("overview"));
-                    tmdMovies[i].setmVoteAverage(Double.parseDouble(movies.getJSONObject(i).getString("vote_average")));
-                    tmdMovies[i].setmPosterUri(TMDAPIConnector.getMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
-                    tmdMovies[i].setmBigPosterUri(TMDAPIConnector.getBigMoviePosterUriString(movies.getJSONObject(i).getString("poster_path")));
-                }
-                TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(mContext, tmdMovies);
-                mTMDMoviesGridView.setAdapter(tMDMoviePosterAdapter);
-                tMDMoviePosterAdapter.notifyDataSetChanged();
-                showMovies();
-            } catch (JSONException e) {
-                showError();
-            }
-        }
     }
 }
