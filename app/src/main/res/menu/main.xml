@@ -11,4 +11,9 @@
         android:title="@string/menu_item_most_popular"
         android:orderInCategory="2"
         app:showAsAction="ifRoom"></item>
+    <item
+        android:id="@+id/menu_item_favorites"
+        android:title="@string/menu_item_favorites"
+        android:orderInCategory="3"
+        app:showAsAction="ifRoom"></item>
 </menu>

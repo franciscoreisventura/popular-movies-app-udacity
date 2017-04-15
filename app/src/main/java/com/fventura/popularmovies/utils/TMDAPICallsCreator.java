@@ -13,9 +13,9 @@ import java.util.Scanner;
  * Created by fventura on 15/02/17.
  */
 
-public class TMDAPIConnector {
+public class TMDAPICallsCreator {
     private final static String TMD_BASE_URL = "https://api.themoviedb.org/3/movie/";
-    private final static String TMD_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
+    private final static String TMD_IMAGE_URL = "http://image.tmdb.org/t/p/w500";
     private final static String TMD_BIG_IMAGE_URL = "http://image.tmdb.org/t/p/w780";
     private static final String SORT_MOST_POPULAR = "popular";
     private final static String SORT_TOP_RATED = "top_rated";
@@ -54,26 +54,4 @@ public class TMDAPIConnector {
     public static String getBigMoviePosterUriString(String poster) {
         return Uri.parse(TMD_BIG_IMAGE_URL + poster).buildUpon().build().toString();
     }
-
-    public static String getResponseFromAPI(URL... params) throws IOException {
-        if (params[0] == null || params[0].equals("")) {
-            return null;
-        }
-        HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = (HttpURLConnection) params[0].openConnection();
-            InputStream in = urlConnection.getInputStream();
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
-            boolean hasInput = scanner.hasNext();
-            if (hasInput) {
-                return scanner.next();
-            } else {
-                return null;
-            }
-        } finally {
-            urlConnection.disconnect();
-        }
-    }
-
 }

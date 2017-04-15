@@ -14,6 +14,7 @@ public class TMDMovie implements Serializable {
     private String mBigPosterUri;
     private String mTitle;
     private String mReleaseDate;
+    private int mRuntime;
     private double mVoteAverage;
     private String mSynopsis;
 
@@ -51,6 +52,14 @@ public class TMDMovie implements Serializable {
 
     public void setmReleaseDate(String mReleaseDate) {
         this.mReleaseDate = mReleaseDate;
+    }
+
+    public int getmRuntime() {
+        return mRuntime;
+    }
+
+    public void setmRuntime(int mRuntime) {
+        this.mRuntime = mRuntime;
     }
 
     public double getmVoteAverage() {

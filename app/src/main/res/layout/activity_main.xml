@@ -8,12 +8,14 @@
 
     <GridView
         android:id="@+id/gv_tmdmovies"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:numColumns="auto_fit"
         android:gravity="center"
-        android:numColumns="2"
-        android:stretchMode="columnWidth" />
-    />
+        android:verticalSpacing="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:stretchMode="columnWidth"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/tv_error"

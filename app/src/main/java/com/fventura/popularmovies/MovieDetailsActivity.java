@@ -16,6 +16,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private TextView mTitle;
     private TextView mSynopsis;
     private TextView mDateReleased;
+    private TextView mRuntime;
     private TextView mVoteAverage;
     private ImageView mPoster;
 
@@ -27,13 +28,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
         mTitle = (TextView) findViewById(R.id.tv_movie_details_title);
         mSynopsis = (TextView) findViewById(R.id.tv_movie_details_synopsis);
         mDateReleased = (TextView) findViewById(R.id.tv_movie_details_date_release);
+        mRuntime = (TextView) findViewById(R.id.tv_movie_details_runtime);
         mVoteAverage = (TextView) findViewById(R.id.tv_movie_details_vote_average);
         if (getIntent().hasExtra(TMDMovie.class.getName())) {
             TMDMovie movie = (TMDMovie) getIntent().getSerializableExtra(TMDMovie.class.getName());
             mTitle.setText(movie.getmTitle());
             mSynopsis.setText(movie.getmSynopsis());
-            mDateReleased.setText(movie.getmReleaseDate());
-            mVoteAverage.setText(movie.getmVoteAverage()+"");
+            mDateReleased.setText(movie.getmReleaseDate().split("-")[0]);
+            mVoteAverage.setText(movie.getmVoteAverage()+"/10");
+            mRuntime.setText(movie.getmRuntime()+"m");
             Picasso.with(this).load(movie.getmBigPosterUri()).into((ImageView) mPoster);
         }
     }
