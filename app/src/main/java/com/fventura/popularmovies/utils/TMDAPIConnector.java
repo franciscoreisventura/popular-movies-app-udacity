@@ -43,7 +43,6 @@ public class TMDAPIConnector {
         try {
             return new URL(uri.toString());
         } catch (MalformedURLException e) {
-            e.printStackTrace(); //TODO ERROR HANDLING
             return null;
         }
     }

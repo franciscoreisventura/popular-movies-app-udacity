@@ -10,16 +10,14 @@
         android:id="@+id/gv_tmdmovies"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:stretchMode="columnWidth"
-        android:numColumns="auto_fit"
-        android:columnWidth="70dp"
-        android:layout_margin="10dp"
         android:gravity="center"
-        />
+        android:numColumns="2"
+        android:stretchMode="columnWidth" />
+    />
 
     <TextView
         android:id="@+id/tv_error"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/tv_error_error_message"/>
+        android:text="@string/tv_error_error_message" />
 </FrameLayout>

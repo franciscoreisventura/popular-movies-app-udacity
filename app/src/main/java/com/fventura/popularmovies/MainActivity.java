@@ -12,6 +12,9 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.fventura.popularmovies.utils.TMDAPIConnector;
@@ -34,19 +37,8 @@ public class MainActivity extends AppCompatActivity {
         mErrorTextView = (TextView) findViewById(R.id.tv_error);
         showMovies();
         mQueue = Volley.newRequestQueue(this);
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), TMDAPIConnector.SORT_OPTIONS.MOST_POPULAR).toString(),
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        parseResponse(response);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                showError();
-            }
-        });
-        mQueue.add(stringRequest);
+        JsonObjectRequest jsonRequest = createJsonRequest(TMDAPIConnector.SORT_OPTIONS.MOST_POPULAR);
+        mQueue.add(jsonRequest);
     }
 
     @Override
@@ -66,19 +58,8 @@ public class MainActivity extends AppCompatActivity {
                 sortOption = TMDAPIConnector.SORT_OPTIONS.TOP_RATED;
                 break;
         }
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), sortOption).toString(),
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        parseResponse(response);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                showError();
-            }
-        });
-        mQueue.add(stringRequest);
+        JsonObjectRequest jsonRequest = createJsonRequest(sortOption);
+        mQueue.add(jsonRequest);
         return true;
     }
 
@@ -92,14 +73,29 @@ public class MainActivity extends AppCompatActivity {
         mErrorTextView.setVisibility(View.INVISIBLE);
     }
 
-    private void parseResponse(String response) {
+    private JsonObjectRequest createJsonRequest(TMDAPIConnector.SORT_OPTIONS sortOption) {
+        return new JsonObjectRequest(TMDAPIConnector.getSortedMoviesURL(getString(R.string.api_key), sortOption).toString(), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        parseResponse(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                showError();
+            }
+        });
+    }
+
+    private void parseResponse(JSONObject response) {
         if (response == null) {
             showError();
             return;
         }
         try {
-            JSONObject resultJSON = new JSONObject(response);
-            JSONArray movies = resultJSON.getJSONArray("results");
+            JSONArray movies = response.getJSONArray("results");
             TMDMovie[] tmdMovies = new TMDMovie[movies.length()];
             for (int i = 0; i < movies.length(); i++) {
                 tmdMovies[i] = new TMDMovie();
