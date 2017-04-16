@@ -1,11 +1,13 @@
 package com.fventura.popularmovies;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
+import android.widget.Toast;
 
 /**
  * Created by fventura on 16/02/17.
@@ -30,14 +32,16 @@ public class MovieDetailsActivity extends AppCompatActivity {
         mDateReleased = (TextView) findViewById(R.id.tv_movie_details_date_release);
         mRuntime = (TextView) findViewById(R.id.tv_movie_details_runtime);
         mVoteAverage = (TextView) findViewById(R.id.tv_movie_details_vote_average);
-        if (getIntent().hasExtra(TMDMovie.class.getName())) {
-            TMDMovie movie = (TMDMovie) getIntent().getSerializableExtra(TMDMovie.class.getName());
-            mTitle.setText(movie.getmTitle());
-            mSynopsis.setText(movie.getmSynopsis());
-            mDateReleased.setText(movie.getmReleaseDate().split("-")[0]);
-            mVoteAverage.setText(movie.getmVoteAverage()+"/10");
-            mRuntime.setText(movie.getmRuntime()+"m");
-            Picasso.with(this).load(movie.getmBigPosterUri()).into((ImageView) mPoster);
+        if (getIntent().hasExtra("movieid")) {
+            int movieId = getIntent().getIntExtra("movieid", 0);
+            if(movieId == 0){
+                showError();
+            }
         }
+    }
+
+    private void showError() {
+        Toast.makeText(this, R.string.toast_error_no_movie, Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

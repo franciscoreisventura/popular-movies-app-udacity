@@ -20,6 +20,7 @@ public class TMDAPICallsCreator {
     private static final String SORT_MOST_POPULAR = "popular";
     private final static String SORT_TOP_RATED = "top_rated";
     private final static String API_KEY_QUERY = "api_key";
+    private final static String TMD_MOVIE_URL = TMD_BASE_URL + "/movie/";
 
     public enum SORT_OPTIONS {
         MOST_POPULAR,
@@ -48,10 +49,18 @@ public class TMDAPICallsCreator {
     }
 
     public static String getMoviePosterUriString(String poster) {
-        return Uri.parse(TMD_IMAGE_URL + poster).buildUpon().build().toString();
+        return parse(TMD_IMAGE_URL + poster);
     }
 
     public static String getBigMoviePosterUriString(String poster) {
-        return Uri.parse(TMD_BIG_IMAGE_URL + poster).buildUpon().build().toString();
+        return parse(TMD_BIG_IMAGE_URL + poster);
+    }
+
+    public static String getMovieById(int id) {
+        return parse(TMD_MOVIE_URL + id);
+    }
+
+    private static String parse(String uri) {
+        return Uri.parse(uri).buildUpon().build().toString();
     }
 }

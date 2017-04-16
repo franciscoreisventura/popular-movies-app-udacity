@@ -7,16 +7,17 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import com.fventura.popularmovies.pojos.TMDMoviePoster;
 import com.squareup.picasso.Picasso;
 
 /**
  * Created by fventura on 14/02/17.
  */
 
-public class TMDMoviePosterAdapter extends ArrayAdapter<TMDMovie> {
+public class TMDMoviePosterAdapter extends ArrayAdapter<TMDMoviePoster> {
 
-    public TMDMoviePosterAdapter(Context context, TMDMovie[] tmdMovieList) {
-        super(context, 0, tmdMovieList);
+    public TMDMoviePosterAdapter(Context context, TMDMoviePoster[] tmdMoviePosterList) {
+        super(context, 0, tmdMoviePosterList);
     }
 
     @Override
@@ -24,14 +25,13 @@ public class TMDMoviePosterAdapter extends ArrayAdapter<TMDMovie> {
         if (convertView == null) {
             convertView = new ImageView(getContext());
         }
-        final TMDMovie tBDMovie = getItem(position);
+        final TMDMoviePoster tBDMovie = getItem(position);
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Context context = getContext();
-                Class destinationActivity = MovieDetailsActivity.class;
-                Intent startMovieDetailsActivity = new Intent(context, destinationActivity);
-                startMovieDetailsActivity.putExtra(TMDMovie.class.getName(), tBDMovie);
+                Intent startMovieDetailsActivity = new Intent(context, MovieDetailsActivity.class);
+                startMovieDetailsActivity.putExtra("movieid", tBDMovie.getmId());
                 context.startActivity(startMovieDetailsActivity);
             }
         });

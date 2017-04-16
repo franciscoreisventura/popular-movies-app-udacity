@@ -14,6 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.fventura.popularmovies.pojos.TMDMoviePoster;
 import com.fventura.popularmovies.utils.TMDAPICallsCreator;
 
 import org.json.JSONArray;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mErrorTextView;
     RequestQueue mQueue;
 
+    //TODO fix application lifecycle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,19 +99,14 @@ public class MainActivity extends AppCompatActivity {
         }
         try {
             JSONArray movies = response.getJSONArray("results");
-            TMDMovie[] tmdMovies = new TMDMovie[movies.length()];
+            TMDMoviePoster[] tmdMoviePosters = new TMDMoviePoster[movies.length()];
             for (int i = 0; i < movies.length(); i++) {
                 JSONObject currentObject = movies.getJSONObject(i);
-                tmdMovies[i] = new TMDMovie();
-                tmdMovies[i].setmTitle(currentObject.getString("title"));
-                tmdMovies[i].setmReleaseDate(currentObject.getString(("release_date")));
-                tmdMovies[i].setmSynopsis(currentObject.getString("overview"));
-//                tmdMovies[i].setmRuntime(currentObject.getInt("runtime")); //TODO runtime only exists on movie details. This has to be changed.
-                tmdMovies[i].setmVoteAverage(currentObject.getDouble("vote_average"));
-                tmdMovies[i].setmPosterUri(TMDAPICallsCreator.getMoviePosterUriString(currentObject.getString("poster_path")));
-                tmdMovies[i].setmBigPosterUri(TMDAPICallsCreator.getBigMoviePosterUriString(currentObject.getString("poster_path")));
+                tmdMoviePosters[i] = new TMDMoviePoster();
+                tmdMoviePosters[i].setmId(currentObject.getInt("id"));
+                tmdMoviePosters[i].setmPosterUri(TMDAPICallsCreator.getMoviePosterUriString(currentObject.getString("poster_path")));
             }
-            TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(MainActivity.this, tmdMovies);
+            TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(MainActivity.this, tmdMoviePosters);
             mTMDMoviesGridView.setAdapter(tMDMoviePosterAdapter);
             tMDMoviePosterAdapter.notifyDataSetChanged();
             showMovies();
