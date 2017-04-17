@@ -15,7 +15,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.fventura.popularmovies.pojos.TMDMoviePoster;
-import com.fventura.popularmovies.utils.TMDAPICallsCreator;
+import com.fventura.popularmovies.utils.TMDAPIHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,8 +37,7 @@ public class MainActivity extends AppCompatActivity {
         mErrorTextView = (TextView) findViewById(R.id.tv_error);
         showMovies();
         mQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonRequest = createJsonRequest(TMDAPICallsCreator.SORT_OPTIONS.MOST_POPULAR);
-        mQueue.add(jsonRequest);
+        mQueue.add(createJsonRequest(TMDAPIHelper.SORT_OPTIONS.MOST_POPULAR));
     }
 
     @Override
@@ -49,20 +48,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        TMDAPICallsCreator.SORT_OPTIONS sortOption = null;
+        TMDAPIHelper.SORT_OPTIONS sortOption = null;
         switch (item.getItemId()) {
             case R.id.menu_item_most_popular:
-                sortOption = TMDAPICallsCreator.SORT_OPTIONS.MOST_POPULAR;
+                sortOption = TMDAPIHelper.SORT_OPTIONS.MOST_POPULAR;
                 break;
             case R.id.menu_item_top_rated:
-                sortOption = TMDAPICallsCreator.SORT_OPTIONS.TOP_RATED;
+                sortOption = TMDAPIHelper.SORT_OPTIONS.TOP_RATED;
                 break;
             case R.id.menu_item_favorites:
                 //TODO get movies on database
                 return true;
         }
-        JsonObjectRequest jsonRequest = createJsonRequest(sortOption);
-        mQueue.add(jsonRequest);
+        mQueue.add(createJsonRequest(sortOption));
         return true;
     }
 
@@ -76,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
         mErrorTextView.setVisibility(View.INVISIBLE);
     }
 
-    private JsonObjectRequest createJsonRequest(TMDAPICallsCreator.SORT_OPTIONS sortOption) {
-        return new JsonObjectRequest(TMDAPICallsCreator.getSortedMoviesURL(getString(R.string.api_key), sortOption).toString(), null,
+    private JsonObjectRequest createJsonRequest(TMDAPIHelper.SORT_OPTIONS sortOption) {
+        return new JsonObjectRequest(TMDAPIHelper.getSortedMoviesURL(getString(R.string.api_key), sortOption).toString(), null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -104,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject currentObject = movies.getJSONObject(i);
                 tmdMoviePosters[i] = new TMDMoviePoster();
                 tmdMoviePosters[i].setmId(currentObject.getInt("id"));
-                tmdMoviePosters[i].setmPosterUri(TMDAPICallsCreator.getMoviePosterUriString(currentObject.getString("poster_path")));
+                tmdMoviePosters[i].setmPosterUri(TMDAPIHelper.getMoviePosterUriString(currentObject.getString("poster_path")));
             }
             TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(MainActivity.this, tmdMoviePosters);
             mTMDMoviesGridView.setAdapter(tMDMoviePosterAdapter);
