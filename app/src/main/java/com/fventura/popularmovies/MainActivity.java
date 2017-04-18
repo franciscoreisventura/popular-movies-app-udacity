@@ -24,20 +24,30 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private static final String CURRENT_SORT_PREFERENCE = "current_sort_preference";
+    private String mCurrentSort = TMDAPIHelper.SORT_OPTIONS.MOST_POPULAR.toString();
     private GridView mTMDMoviesGridView;
     private TextView mErrorTextView;
     RequestQueue mQueue;
 
-    //TODO fix application lifecycle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTMDMoviesGridView = (GridView) findViewById(R.id.gv_tmdmovies);
         mErrorTextView = (TextView) findViewById(R.id.tv_error);
-        showMovies();
         mQueue = Volley.newRequestQueue(this);
-        mQueue.add(createJsonRequest(TMDAPIHelper.SORT_OPTIONS.MOST_POPULAR));
+        showMovies();
+        if(savedInstanceState != null){
+            mCurrentSort = savedInstanceState.getString(CURRENT_SORT_PREFERENCE);
+        }
+        mQueue.add(createJsonRequest(TMDAPIHelper.SORT_OPTIONS.valueOf(mCurrentSort)));
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(CURRENT_SORT_PREFERENCE, mCurrentSort);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -60,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 //TODO get movies on database
                 return true;
         }
+        mCurrentSort = sortOption.toString();
         mQueue.add(createJsonRequest(sortOption));
         return true;
     }
