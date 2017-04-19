@@ -14,6 +14,28 @@
         tools:context=".MovieDetailsActivity">
 
         <TextView
+            android:id="@+id/tv_videos_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="7dp"
+            android:background="@android:color/holo_green_dark"
+            android:padding="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_movie_details_synopsis"
+            tools:layout_conversion_absoluteHeight="16dp"
+            tools:layout_conversion_absoluteWidth="255dp"
+            tools:layout_conversion_absoluteX="113dp"
+            tools:layout_conversion_absoluteY="32dp"
+            tools:text="Videos" />
+
+        <TextView
             android:id="@+id/tv_movie_details_synopsis"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -124,19 +146,28 @@
             style="@style/Widget.AppCompat.Button.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
             android:layout_marginTop="30dp"
             android:background="@android:color/holo_green_light"
             android:elevation="0dp"
             android:padding="8dp"
             android:text="@string/button_details_add_to_favorites"
             android:textAppearance="@style/TextAppearance.AppCompat.Button"
-            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintLeft_toLeftOf="@+id/tv_movie_details_date_release"
             app:layout_constraintRight_toRightOf="@+id/tv_movie_details_date_release"
             app:layout_constraintTop_toBottomOf="@+id/tv_movie_details_vote_average"
             tools:text="Add to Favorites" />
+
+        <ListView
+            android:id="@+id/lv_movie_details_videos"
+            android:layout_width="0dp"
+            android:layout_height="138dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="-1dp"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_videos_title"
+            app:layout_constraintRight_toRightOf="@+id/tv_videos_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_videos_title" />
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

@@ -20,6 +20,7 @@ public class TMDAPIHelper {
     private static final String SORT_MOST_POPULAR = "popular";
     private final static String SORT_TOP_RATED = "top_rated";
     private final static String API_KEY_QUERY = "api_key";
+    private final static String TMD_VIDEOS = "/videos";
 
     public enum SORT_OPTIONS {
         MOST_POPULAR,
@@ -44,10 +45,11 @@ public class TMDAPIHelper {
     }
 
     public static String getMovieById(String apiKey, int id) {
-        return Uri.parse(TMD_BASE_URL + id)
-                .buildUpon()
-                .appendQueryParameter(API_KEY_QUERY, apiKey)
-                .build().toString();
+        return parseWithApiKey(TMD_BASE_URL + id, apiKey);
+    }
+
+    public static String getVideosFromMovie(String apiKey, int id) {
+        return parseWithApiKey(TMD_BASE_URL + id + TMD_VIDEOS, apiKey);
     }
 
     public static String getMoviePosterUriString(String poster) {
@@ -60,5 +62,12 @@ public class TMDAPIHelper {
 
     private static String parse(String uri) {
         return Uri.parse(uri).buildUpon().build().toString();
+    }
+
+    private static String parseWithApiKey(String uri, String apiKey) {
+        return Uri.parse(uri)
+                .buildUpon()
+                .appendQueryParameter(API_KEY_QUERY, apiKey)
+                .build().toString();
     }
 }

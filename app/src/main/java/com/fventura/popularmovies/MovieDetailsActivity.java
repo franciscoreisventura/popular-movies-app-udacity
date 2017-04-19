@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,9 +13,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.fventura.popularmovies.pojos.TMDMovieVideo;
 import com.fventura.popularmovies.utils.TMDAPIHelper;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,6 +34,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private TextView mRuntime;
     private TextView mVoteAverage;
     private ImageView mPoster;
+    private ListView mVideosListView;
+
     private RequestQueue mQueue;
 
 
@@ -44,6 +49,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         mDateReleased = (TextView) findViewById(R.id.tv_movie_details_date_release);
         mRuntime = (TextView) findViewById(R.id.tv_movie_details_runtime);
         mVoteAverage = (TextView) findViewById(R.id.tv_movie_details_vote_average);
+        mVideosListView = (ListView) findViewById(R.id.lv_movie_details_videos);
         mQueue = Volley.newRequestQueue(this);
 
         if (getIntent().hasExtra("movieid")) {
@@ -52,11 +58,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 Log.e(TAG, "No movie id provided to activity");
                 showError();
             }
-            mQueue.add(createJsonRequest(movieId));
+            mQueue.add(fillMovieDetails(movieId));
+            mQueue.add(fillMovieVideos(movieId));
         }
     }
 
-    private JsonObjectRequest createJsonRequest(final int movieId) {
+    private JsonObjectRequest fillMovieDetails(final int movieId) {
         return new JsonObjectRequest(TMDAPIHelper.getMovieById(getString(R.string.api_key), movieId).toString(), null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -81,6 +88,36 @@ public class MovieDetailsActivity extends AppCompatActivity {
             }
         });
     }
+
+    private JsonObjectRequest fillMovieVideos(final int movieId) {
+        return new JsonObjectRequest(TMDAPIHelper.getVideosFromMovie(getString(R.string.api_key), movieId).toString(), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray videos = response.getJSONArray("results");
+                            TMDMovieVideo[] tmdMovieVideos = new TMDMovieVideo[videos.length()];
+                            for (int i = 0; i < videos.length(); i++) {
+                                JSONObject currentObject = videos.getJSONObject(i);
+                                tmdMovieVideos[i] = new TMDMovieVideo(currentObject.getString("key"), currentObject.getString("name"));
+                            }
+                            TMDMovieVideoAdapter tmdMovieVideoAdapter = new TMDMovieVideoAdapter(MovieDetailsActivity.this, tmdMovieVideos);
+                            mVideosListView.setAdapter(tmdMovieVideoAdapter);
+                            tmdMovieVideoAdapter.notifyDataSetChanged();
+                        }catch (JSONException e){
+                            Log.e(TAG, "Error parsing videos JSON for movie: " + movieId, e);
+                            showError();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Error getting movie videos from TMD for movie: " + movieId, error);
+                showError();
+            }
+        });
+    }
+
 
     private void showError() {
         Toast.makeText(this, R.string.toast_error_no_movie, Toast.LENGTH_SHORT).show();
