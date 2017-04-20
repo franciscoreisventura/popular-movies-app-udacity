@@ -13,6 +13,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.fventura.popularmovies.pojos.TMDMovieReview;
 import com.fventura.popularmovies.pojos.TMDMovieVideo;
 import com.fventura.popularmovies.utils.TMDAPIHelper;
 import com.squareup.picasso.Picasso;
@@ -35,6 +36,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private TextView mVoteAverage;
     private ImageView mPoster;
     private ListView mVideosListView;
+    private ListView mReviewsListView;
 
     private RequestQueue mQueue;
 
@@ -50,6 +52,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         mRuntime = (TextView) findViewById(R.id.tv_movie_details_runtime);
         mVoteAverage = (TextView) findViewById(R.id.tv_movie_details_vote_average);
         mVideosListView = (ListView) findViewById(R.id.lv_movie_details_videos);
+        mReviewsListView = (ListView) findViewById(R.id.lv_movie_details_reviews);
         mQueue = Volley.newRequestQueue(this);
 
         if (getIntent().hasExtra("movieid")) {
@@ -60,6 +63,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
             }
             mQueue.add(fillMovieDetails(movieId));
             mQueue.add(fillMovieVideos(movieId));
+            mQueue.add(fillMovieReviews(movieId));
         }
     }
 
@@ -118,6 +122,34 @@ public class MovieDetailsActivity extends AppCompatActivity {
         });
     }
 
+    private JsonObjectRequest fillMovieReviews(final int movieId) {
+        return new JsonObjectRequest(TMDAPIHelper.getReviewsFromMovie(getString(R.string.api_key), movieId).toString(), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray reviews = response.getJSONArray("results");
+                            TMDMovieReview[] tmdMovieReviews = new TMDMovieReview[reviews.length()];
+                            for (int i = 0; i < reviews.length(); i++) {
+                                JSONObject currentObject = reviews.getJSONObject(i);
+                                tmdMovieReviews[i] = new TMDMovieReview(currentObject.getString("author"), currentObject.getString("content"));
+                            }
+                            TMDMovieReviewAdapter tmdMovieReviewAdapter = new TMDMovieReviewAdapter(MovieDetailsActivity.this, tmdMovieReviews);
+                            mReviewsListView.setAdapter(tmdMovieReviewAdapter);
+                            tmdMovieReviewAdapter.notifyDataSetChanged();
+                        }catch (JSONException e){
+                            Log.e(TAG, "Error parsing reviews JSON for movie: " + movieId, e);
+                            showError();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Error getting movie reviews from TMD for movie: " + movieId, error);
+                showError();
+            }
+        });
+    }
 
     private void showError() {
         Toast.makeText(this, R.string.toast_error_no_movie, Toast.LENGTH_SHORT).show();

@@ -21,6 +21,7 @@ public class TMDAPIHelper {
     private final static String SORT_TOP_RATED = "top_rated";
     private final static String API_KEY_QUERY = "api_key";
     private final static String TMD_VIDEOS = "/videos";
+    private final static String TMD_REVIEWS = "/reviews";
 
     public enum SORT_OPTIONS {
         MOST_POPULAR,
@@ -50,6 +51,10 @@ public class TMDAPIHelper {
 
     public static String getVideosFromMovie(String apiKey, int id) {
         return parseWithApiKey(TMD_BASE_URL + id + TMD_VIDEOS, apiKey);
+    }
+
+    public static String getReviewsFromMovie(String apiKey, int id) {
+        return parseWithApiKey(TMD_BASE_URL + id + TMD_REVIEWS, apiKey);
     }
 
     public static String getMoviePosterUriString(String poster) {
