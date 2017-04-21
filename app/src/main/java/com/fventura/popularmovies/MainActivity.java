@@ -1,5 +1,6 @@
 package com.fventura.popularmovies;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,6 +15,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.fventura.popularmovies.data.TMDMovieContract;
 import com.fventura.popularmovies.pojos.TMDMoviePoster;
 import com.fventura.popularmovies.utils.TMDAPIHelper;
 
@@ -23,8 +25,14 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String[] MOVIE_FAVORITES_PROJECTION = {
+            TMDMovieContract.TMDMovieEntry._ID,
+            TMDMovieContract.TMDMovieEntry.COLUMN_TMD_ID,
+            TMDMovieContract.TMDMovieEntry.COLUMN_POSTER_URI
+    };
     private static final String TAG = "MainActivity";
     private static final String CURRENT_SORT_PREFERENCE = "current_sort_preference";
+    private static final String FAVORITES_SORT = "favorites";
     private String mCurrentSort = TMDAPIHelper.SORT_OPTIONS.MOST_POPULAR.toString();
     private GridView mTMDMoviesGridView;
     private TextView mErrorTextView;
@@ -38,10 +46,20 @@ public class MainActivity extends AppCompatActivity {
         mErrorTextView = (TextView) findViewById(R.id.tv_error);
         mQueue = Volley.newRequestQueue(this);
         showMovies();
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             mCurrentSort = savedInstanceState.getString(CURRENT_SORT_PREFERENCE);
         }
-        mQueue.add(createJsonRequest(TMDAPIHelper.SORT_OPTIONS.valueOf(mCurrentSort)));
+        else {
+            mQueue.add(queryTMDAPI(TMDAPIHelper.SORT_OPTIONS.valueOf(mCurrentSort)));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(mCurrentSort.equals(FAVORITES_SORT)){
+            fillGridViewFavorites();
+        }
     }
 
     @Override
@@ -67,11 +85,10 @@ public class MainActivity extends AppCompatActivity {
                 sortOption = TMDAPIHelper.SORT_OPTIONS.TOP_RATED;
                 break;
             case R.id.menu_item_favorites:
-                //TODO get movies on database
+                fillGridViewFavorites();
                 return true;
         }
-        mCurrentSort = sortOption.toString();
-        mQueue.add(createJsonRequest(sortOption));
+        mQueue.add(queryTMDAPI(sortOption));
         return true;
     }
 
@@ -85,7 +102,8 @@ public class MainActivity extends AppCompatActivity {
         mErrorTextView.setVisibility(View.INVISIBLE);
     }
 
-    private JsonObjectRequest createJsonRequest(TMDAPIHelper.SORT_OPTIONS sortOption) {
+    private JsonObjectRequest queryTMDAPI(TMDAPIHelper.SORT_OPTIONS sortOption) {
+        mCurrentSort = sortOption.toString();
         return new JsonObjectRequest(TMDAPIHelper.getSortedMoviesURL(getString(R.string.api_key), sortOption).toString(), null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -123,5 +141,20 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Error filling the movies grid", e);
             showError();
         }
+    }
+
+    private void fillGridViewFavorites() {
+        mCurrentSort = FAVORITES_SORT;
+        Cursor movies = getContentResolver().query(TMDMovieContract.TMDMovieEntry.CONTENT_URI, null, null, null, null);
+        TMDMoviePoster[] tmdMoviePosters = new TMDMoviePoster[movies.getCount()];
+        for (int i = 0; movies.moveToNext(); i++) {
+            tmdMoviePosters[i] = new TMDMoviePoster();
+            tmdMoviePosters[i].setmId(movies.getInt(movies.getColumnIndex(TMDMovieContract.TMDMovieEntry.COLUMN_TMD_ID)));
+            tmdMoviePosters[i].setmPosterUri(TMDAPIHelper.getMoviePosterUriString(movies.getString(movies.getColumnIndex(TMDMovieContract.TMDMovieEntry.COLUMN_POSTER_URI))));
+        }
+        TMDMoviePosterAdapter tMDMoviePosterAdapter = new TMDMoviePosterAdapter(MainActivity.this, tmdMoviePosters);
+        mTMDMoviesGridView.setAdapter(tMDMoviePosterAdapter);
+        tMDMoviePosterAdapter.notifyDataSetChanged();
+        showMovies();
     }
 }

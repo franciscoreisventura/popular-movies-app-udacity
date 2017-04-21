@@ -22,7 +22,9 @@ public class TMDMovieDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         final String CREATE_TABLE = "CREATE TABLE " + TMDMovieContract.TMDMovieEntry.TABLE_NAME + " (" +
                 TMDMovieContract.TMDMovieEntry._ID + " INTEGER PRIMARY KEY, " +
-                TMDMovieContract.TMDMovieEntry.COLUMN_TMD_ID + " INTEGER NOT NULL, ";
+                TMDMovieContract.TMDMovieEntry.COLUMN_TMD_ID + " INTEGER NOT NULL, " +
+                TMDMovieContract.TMDMovieEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
+                TMDMovieContract.TMDMovieEntry.COLUMN_POSTER_URI + " TEXT NOT NULL)";
         db.execSQL(CREATE_TABLE);
     }
 

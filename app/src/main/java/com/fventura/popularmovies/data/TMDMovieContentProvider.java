@@ -18,14 +18,12 @@ import android.support.annotation.Nullable;
 public class TMDMovieContentProvider extends ContentProvider {
 
     public static final int TMDMOVIES = 100;
-    public static final int TMDMOVIE_WITH_ID = 101;
     private static final UriMatcher sUriMatcher = buildURIMatcher();
     private TMDMovieDbHelper tmdMovieDbHelper;
 
     private static UriMatcher buildURIMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(TMDMovieContract.AUTHORITY, TMDMovieContract.PATH_MOVIES, TMDMOVIES);
-        uriMatcher.addURI(TMDMovieContract.AUTHORITY, TMDMovieContract.PATH_MOVIES + "/#", TMDMOVIE_WITH_ID);
         return uriMatcher;
     }
 
@@ -96,9 +94,8 @@ public class TMDMovieContentProvider extends ContentProvider {
         int deleted;
 
         switch (match) {
-            case TMDMOVIE_WITH_ID:
-                String id = uri.getPathSegments().get(1);
-                deleted = db.delete(TMDMovieContract.TMDMovieEntry.TABLE_NAME, "_id=?", new String[]{id});
+            case TMDMOVIES:
+                deleted = db.delete(TMDMovieContract.TMDMovieEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

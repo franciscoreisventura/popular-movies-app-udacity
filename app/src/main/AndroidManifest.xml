@@ -20,6 +20,11 @@
         <activity
             android:name=".MovieDetailsActivity"
             android:parentActivityName=".MainActivity"></activity>
+        
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".data.TMDMovieContentProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

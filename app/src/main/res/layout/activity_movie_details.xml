@@ -128,7 +128,6 @@
             android:background="@android:color/holo_green_light"
             android:elevation="0dp"
             android:padding="8dp"
-            android:text="@string/button_details_add_to_favorites"
             android:textAppearance="@style/TextAppearance.AppCompat.Button"
             app:layout_constraintLeft_toLeftOf="@+id/tv_movie_details_date_release"
             app:layout_constraintRight_toRightOf="@+id/tv_movie_details_date_release"

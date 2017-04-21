@@ -1,8 +1,11 @@
 package com.fventura.popularmovies;
 
+import android.content.ContentValues;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -13,6 +16,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.fventura.popularmovies.data.TMDMovieContract;
+import com.fventura.popularmovies.pojos.TMDMovie;
 import com.fventura.popularmovies.pojos.TMDMovieReview;
 import com.fventura.popularmovies.pojos.TMDMovieVideo;
 import com.fventura.popularmovies.utils.TMDAPIHelper;
@@ -37,8 +42,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private ImageView mPoster;
     private ListView mVideosListView;
     private ListView mReviewsListView;
-
+    private Button mAddToFavorites;
     private RequestQueue mQueue;
+    private int mMovieId;
+    private String mPosterUri;
+    private String mMovieTitle;
 
 
     @Override
@@ -53,48 +61,69 @@ public class MovieDetailsActivity extends AppCompatActivity {
         mVoteAverage = (TextView) findViewById(R.id.tv_movie_details_vote_average);
         mVideosListView = (ListView) findViewById(R.id.lv_movie_details_videos);
         mReviewsListView = (ListView) findViewById(R.id.lv_movie_details_reviews);
+        mAddToFavorites = (Button) findViewById(R.id.bt_details_add_to_favorites);
         mQueue = Volley.newRequestQueue(this);
 
         if (getIntent().hasExtra("movieid")) {
-            int movieId = getIntent().getIntExtra("movieid", 0);
-            if(movieId == 0){
+            mMovieId = getIntent().getIntExtra("movieid", 0);
+            if(mMovieId == 0){
                 Log.e(TAG, "No movie id provided to activity");
                 showError();
             }
-            mQueue.add(fillMovieDetails(movieId));
-            mQueue.add(fillMovieVideos(movieId));
-            mQueue.add(fillMovieReviews(movieId));
+            mQueue.add(fillMovieDetails());
+            mQueue.add(fillMovieVideos());
+            mQueue.add(fillMovieReviews());
         }
+
+        mAddToFavorites.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isFavorite = isFavorite();
+                if(isFavorite){
+                    getContentResolver().delete(TMDMovieContract.TMDMovieEntry.CONTENT_URI, "tmd_id = ?", new String[]{mMovieId+""});
+                }else{
+                    ContentValues value =  new ContentValues();
+                    value.put("tmd_id", mMovieId);
+                    value.put("title", mMovieTitle);
+                    value.put("poster_uri", mPosterUri);
+                    getContentResolver().insert(TMDMovieContract.TMDMovieEntry.CONTENT_URI, value);
+                }
+                updateFavoritesButtonTitle(!isFavorite);
+            }
+        });
     }
 
-    private JsonObjectRequest fillMovieDetails(final int movieId) {
-        return new JsonObjectRequest(TMDAPIHelper.getMovieById(getString(R.string.api_key), movieId).toString(), null,
+    private JsonObjectRequest fillMovieDetails() {
+        return new JsonObjectRequest(TMDAPIHelper.getMovieById(getString(R.string.api_key), mMovieId).toString(), null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            mTitle.setText(response.getString("title"));
+                            mMovieTitle = response.getString("title");
+                            mTitle.setText(mMovieTitle);
                             mSynopsis.setText(response.getString("overview"));
                             mDateReleased.setText(response.getString("release_date").substring(0,4));
                             mRuntime.setText(response.getInt("runtime")+"m");
                             mVoteAverage.setText(response.getDouble("vote_average")+"/10");
-                            Picasso.with(MovieDetailsActivity.this).load(TMDAPIHelper.getBigMoviePosterUriString(response.getString("poster_path"))).into(mPoster);
+                            mPosterUri = response.getString("poster_path");
+                            Picasso.with(MovieDetailsActivity.this).load(TMDAPIHelper.getBigMoviePosterUriString(mPosterUri)).into(mPoster);
+                            updateFavoritesButtonTitle(isFavorite());
                         }catch (JSONException e){
-                            Log.e(TAG, "Error parsing JSON for movie: " + movieId, e);
+                            Log.e(TAG, "Error parsing JSON for movie: " + mMovieId, e);
                             showError();
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Error getting movie details from TMD for movie: " + movieId, error);
+                Log.e(TAG, "Error getting movie details from TMD for movie: " + mMovieId, error);
                 showError();
             }
         });
     }
 
-    private JsonObjectRequest fillMovieVideos(final int movieId) {
-        return new JsonObjectRequest(TMDAPIHelper.getVideosFromMovie(getString(R.string.api_key), movieId).toString(), null,
+    private JsonObjectRequest fillMovieVideos() {
+        return new JsonObjectRequest(TMDAPIHelper.getVideosFromMovie(getString(R.string.api_key), mMovieId).toString(), null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -109,21 +138,21 @@ public class MovieDetailsActivity extends AppCompatActivity {
                             mVideosListView.setAdapter(tmdMovieVideoAdapter);
                             tmdMovieVideoAdapter.notifyDataSetChanged();
                         }catch (JSONException e){
-                            Log.e(TAG, "Error parsing videos JSON for movie: " + movieId, e);
+                            Log.e(TAG, "Error parsing videos JSON for movie: " + mMovieId, e);
                             showError();
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Error getting movie videos from TMD for movie: " + movieId, error);
+                Log.e(TAG, "Error getting movie videos from TMD for movie: " + mMovieId, error);
                 showError();
             }
         });
     }
 
-    private JsonObjectRequest fillMovieReviews(final int movieId) {
-        return new JsonObjectRequest(TMDAPIHelper.getReviewsFromMovie(getString(R.string.api_key), movieId).toString(), null,
+    private JsonObjectRequest fillMovieReviews() {
+        return new JsonObjectRequest(TMDAPIHelper.getReviewsFromMovie(getString(R.string.api_key), mMovieId).toString(), null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -138,14 +167,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
                             mReviewsListView.setAdapter(tmdMovieReviewAdapter);
                             tmdMovieReviewAdapter.notifyDataSetChanged();
                         }catch (JSONException e){
-                            Log.e(TAG, "Error parsing reviews JSON for movie: " + movieId, e);
+                            Log.e(TAG, "Error parsing reviews JSON for movie: " + mMovieId, e);
                             showError();
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Error getting movie reviews from TMD for movie: " + movieId, error);
+                Log.e(TAG, "Error getting movie reviews from TMD for movie: " + mMovieId, error);
                 showError();
             }
         });
@@ -154,5 +183,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private void showError() {
         Toast.makeText(this, R.string.toast_error_no_movie, Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private void updateFavoritesButtonTitle(boolean isFavorite) {
+        mAddToFavorites.setText(isFavorite ? R.string.button_details_remove_from_favorites : R.string.button_details_add_to_favorites);
+    }
+
+    private boolean isFavorite(){
+        return getContentResolver().query(TMDMovieContract.TMDMovieEntry.CONTENT_URI, MainActivity.MOVIE_FAVORITES_PROJECTION, "tmd_id = ?", new String[]{mMovieId+""}, null).moveToFirst();
     }
 }

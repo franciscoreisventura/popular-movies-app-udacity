@@ -19,5 +19,7 @@ public class TMDMovieContract {
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIES).build();
         public static final String TABLE_NAME = "tmdmovies";
         public static final String COLUMN_TMD_ID = "tmd_id";
+        public static final String COLUMN_TITLE = "title";
+        public static final String COLUMN_POSTER_URI = "poster_uri";
     }
 }
